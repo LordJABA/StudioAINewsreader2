@@ -1,0 +1,90 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from newspaper import Article
+from dotenv import load_dotenv
+import os
+from functools import wraps
+
+# Load environment variables from .env file
+load_dotenv()
+
+app = Flask(__name__)
+# Enable CORS for all routes, allowing frontend to communicate with this backend
+CORS(app)
+
+# --- Security ---
+# It's crucial to secure the backend to prevent unauthorized use.
+# The secret key should be set as an environment variable on the server.
+SECRET_KEY = os.environ.get('BACKEND_SECRET_KEY')
+
+def require_secret_key(f):
+    """A decorator to protect routes with a secret key."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # 1. Check if the secret key is configured on the server at all.
+        if not SECRET_KEY:
+            # This is a server configuration error.
+            return jsonify({"error": "Backend secret key is not configured on the server."}), 500
+
+        # 2. Check for the 'Authorization' header in the incoming request.
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({"error": "Missing or invalid Authorization header. Expected 'Bearer <key>'."}), 401
+
+        # 3. Extract the key provided by the client.
+        try:
+            provided_key = auth_header.split(' ')[1]
+        except IndexError:
+            return jsonify({"error": "Malformed Authorization header."}), 401
+        
+        # 4. Compare the client's key with the server's secret key.
+        if provided_key != SECRET_KEY:
+            return jsonify({"error": "Invalid secret key."}), 403 # Forbidden
+
+        # If all checks pass, proceed with the original function.
+        return f(*args, **kwargs)
+    return decorated_function
+
+# --- Routes ---
+@app.route('/fetch-url', methods=['GET'])
+@require_secret_key # Apply the security decorator
+def fetch_url_endpoint():
+    """
+    Fetches and parses an article from a given URL.
+    The URL is passed as a query parameter.
+    e.g., /fetch-url?url=https://example.com/article
+    """
+    url_to_fetch = request.args.get('url')
+    if not url_to_fetch:
+        return jsonify({"error": "URL parameter is missing."}), 400 # Bad Request
+
+    try:
+        # Initialize newspaper Article object
+        article = Article(url_to_fetch)
+
+        # Download and parse the article
+        article.download()
+        article.parse()
+
+        # Check if parsing was successful
+        if not article.title or not article.text:
+             return jsonify({
+                "error": "Could not parse the article. The website might be blocking scrapers or has an unsupported format."
+            }), 422 # Unprocessable Entity
+
+        # Return the extracted title and content as JSON
+        return jsonify({
+            "title": article.title,
+            "content": article.text
+        })
+    except Exception as e:
+        # Catch any other exceptions during download/parsing
+        print(f"Error fetching/parsing article at URL {url_to_fetch}: {e}")
+        return jsonify({"error": f"An error occurred while processing the URL: {str(e)}"}), 500
+
+
+if __name__ == '__main__':
+    # This block allows running the server directly for development.
+    # For production, a WSGI server like Gunicorn should be used.
+    # The host '0.0.0.0' makes the server accessible from any IP address.
+    app.run(host='0.0.0.0', port=5000, debug=False)
