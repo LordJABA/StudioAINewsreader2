@@ -1,4 +1,3 @@
-
 # AI Newsreader Backend
 
 This is a simple Flask server designed to fetch and parse web articles. It uses the `newspaper3k` library to extract the main content from a given URL.
@@ -18,12 +17,11 @@ sudo apt-get install python3-pip python3-venv libxml2-dev libxslt1-dev
 
 ### 2. Clone the Repository
 
-Clone your project repository onto the server.
+Clone the project repository onto the server.
 
 ```bash
-# Replace with your repository URL
-git clone https://your-repository-url.git
-cd your-repository-name/backend
+git clone https://github.com/LordJABA/StudioAINewsreader2.git
+cd StudioAINewsreader2/backend
 ```
 
 ### 3. Set Up Python Virtual Environment
@@ -47,7 +45,7 @@ python3 -c 'import secrets; print(secrets.token_hex(32))'
 Copy the generated key. Now, set it as an environment variable. For production, it's best to add this to your shell's startup file (like `~/.bashrc` or `~/.profile`) or a systemd service file.
 
 ```bash
-# Add this line to ~/.bashrc or ~/.profile
+# Add this line to ~/.bashrc or ~/.profile. Replace the placeholder with your actual key.
 export BACKEND_SECRET_KEY='your_super_secret_key_here'
 
 # Then reload your shell
@@ -63,8 +61,6 @@ source ~/.bashrc
 gunicorn --bind 0.0.0.0:5000 server:app
 ```
 
-The server will now be running on port 5000.
-
 ### 6. (Recommended) Run as a Systemd Service
 
 For the server to run persistently and restart on boot, you should run it as a `systemd` service.
@@ -74,7 +70,7 @@ Create a service file:
 sudo nano /etc/systemd/system/newsreader-backend.service
 ```
 
-Paste the following content, making sure to replace `<your_username>` and `<path_to_your_project>` with your actual user and project path.
+Paste the following content, making sure to replace `your_username`, `/path/to/your/StudioAINewsreader2/clone`, and `your_super_secret_key_here` with your actual values.
 
 ```ini
 [Unit]
@@ -82,12 +78,12 @@ Description=Gunicorn instance for AI Newsreader Backend
 After=network.target
 
 [Service]
-User=<your_username>
+User=your_username
 Group=www-data
-WorkingDirectory=<path_to_your_project>/backend
-Environment="PATH=<path_to_your_project>/backend/venv/bin"
+WorkingDirectory=/path/to/your/StudioAINewsreader2/clone/backend
+Environment="PATH=/path/to/your/StudioAINewsreader2/clone/backend/venv/bin"
 Environment="BACKEND_SECRET_KEY=your_super_secret_key_here"
-ExecStart=<path_to_your_project>/backend/venv/bin/gunicorn --workers 3 --bind unix:newsreader-backend.sock -m 007 server:app
+ExecStart=/path/to/your/StudioAINewsreader2/clone/backend/venv/bin/gunicorn --workers 3 --bind unix:newsreader-backend.sock -m 007 server:app
 
 [Install]
 WantedBy=multi-user.target
