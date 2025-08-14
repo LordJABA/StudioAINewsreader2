@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Newsreader</title>
+    <link rel="stylesheet" href="index.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/genai@^1.14.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="settings-modal" class="modal-overlay" style="display: none;">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Backend Settings</h3>
+          <button id="close-settings-btn" class="close-btn" aria-label="Close settings">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p>Configure the connection to your backend server. This information is saved in your browser's local storage.</p>
+          <form id="settings-form">
+            <label for="backend-url">Backend URL</label>
+            <input type="url" id="backend-url" placeholder="http://your-vps-ip:5000" required>
+            <label for="backend-key">Secret Key</label>
+            <input type="password" id="backend-key" placeholder="Enter your secret key" required>
+            <div class="modal-footer">
+               <button type="submit" id="save-settings-btn">Save Settings</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <main>
+      <header>
+        <h1>AI Newsreader</h1>
+        <p>Your personal, intelligent news aggregator.</p>
+         <button id="open-settings-btn" class="settings-btn" aria-label="Open settings">
+           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+           <span>Settings</span>
+        </button>
+      </header>
+
+      <section id="source-manager" aria-labelledby="source-manager-heading">
+        <h2 id="source-manager-heading">Add Content</h2>
+        
+        <div class="tabs">
+          <button id="tab-url" class="tab-btn active" aria-controls="panel-url">Add by URL</button>
+          <button id="tab-text" class="tab-btn" aria-controls="panel-text">Add by Pasting Text</button>
+        </div>
+
+        <div id="panel-url" class="tab-panel active">
+            <form id="add-url-form">
+                <label for="source-url" class="sr-only">Article URL</label>
+                <input type="url" id="source-url" placeholder="https://example.com/article" required />
+                <button type="submit" id="add-url-btn">Fetch Article</button>
+            </form>
+        </div>
+
+        <div id="panel-text" class="tab-panel" style="display: none;">
+            <form id="add-text-form">
+                <label for="article-title" class="sr-only">Article Title</label>
+                <input type="text" id="article-title" placeholder="Enter article title" required />
+                <label for="article-text" class="sr-only">Article Text</label>
+                <textarea id="article-text" placeholder="Paste the full text of the article here..." rows="10" required></textarea>
+                <button type="submit">Add Article</button>
+            </form>
+        </div>
+      </section>
+
+      <section id="articles-container" aria-labelledby="articles-heading">
+        <h2 id="articles-heading">Your Articles</h2>
+        <div id="articles-grid"></div>
+      </section>
+    </main>
+    <script type="module" src="index.tsx"></script>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

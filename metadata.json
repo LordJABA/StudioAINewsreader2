@@ -1,0 +1,5 @@
+{
+  "name": "AI Newsreader",
+  "description": "An AI-powered newsreader that filters, categorizes, and scores articles from user-defined sources.",
+  "requestFramePermissions": []
+}
