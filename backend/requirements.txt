@@ -6,3 +6,4 @@ beautifulsoup4==4.11.1
 newspaper3k==0.2.8
 Flask-Cors==3.0.10
 gunicorn==20.1.0
+lxml_html_clean==0.1.1
