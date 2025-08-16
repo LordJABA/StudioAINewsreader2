@@ -23,7 +23,6 @@ body {
   background-color: var(--background-color);
   color: var(--text-color);
   line-height: 1.6;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
 main {
@@ -361,13 +360,6 @@ button:hover:not(:disabled) {
 }
 
 /* --- Dark Mode --- */
-
-#theme-toggle-btn .moon-icon { display: none; }
-#theme-toggle-btn .sun-icon { display: block; }
-body.dark-mode #theme-toggle-btn .moon-icon { display: block; }
-body.dark-mode #theme-toggle-btn .sun-icon { display: none; }
-
-
 body.dark-mode {
   --background-color: #1a1a1a;
   --text-color: #e2e8f0;
@@ -405,4 +397,3 @@ body.dark-mode .article-summary {
 body.dark-mode .modal-overlay {
     background-color: rgba(0, 0, 0, 0.7);
 }
-

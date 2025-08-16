@@ -26,7 +26,6 @@ interface BackendSettings {
 // --- State ---
 let articles: Article[] = [];
 let backendSettings: BackendSettings | null = null;
-let currentTheme: 'light' | 'dark' = 'light';
 
 // --- DOM Elements ---
 const addUrlForm = document.getElementById('add-url-form') as HTMLFormElement;
@@ -34,9 +33,6 @@ const sourceUrlInput = document.getElementById('source-url') as HTMLInputElement
 const addUrlBtn = document.getElementById('add-url-btn') as HTMLButtonElement;
 
 const articlesGrid = document.getElementById('articles-grid') as HTMLDivElement;
-
-// Theme Toggle
-const themeToggleBtn = document.getElementById('theme-toggle-btn') as HTMLButtonElement;
 
 // Settings Modal Elements
 const settingsModal = document.getElementById('settings-modal') as HTMLDivElement;
@@ -50,16 +46,6 @@ const connectionStatusEl = document.getElementById('connection-status') as HTMLP
 
 
 // --- Functions ---
-
-function setTheme(theme: 'light' | 'dark') {
-    currentTheme = theme;
-    document.body.classList.toggle('dark-mode', theme === 'dark');
-    localStorage.setItem('newsreader-theme', theme);
-}
-
-function toggleTheme() {
-    setTheme(currentTheme === 'light' ? 'dark' : 'light');
-}
 
 function render() {
   renderArticles();
@@ -240,19 +226,6 @@ function loadState() {
   }
 }
 
-function loadTheme() {
-    const savedTheme = localStorage.getItem('newsreader-theme') as 'light' | 'dark' | null;
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (savedTheme) {
-      setTheme(savedTheme);
-    } else if (prefersDark) {
-      setTheme('dark');
-    } else {
-      setTheme('light');
-    }
-  }
-
 // --- Settings Modal Logic ---
 async function testBackendConnection() {
     const url = backendUrlInput.value.trim();
@@ -351,7 +324,6 @@ openSettingsBtn.addEventListener('click', openSettingsModal);
 closeSettingsBtn.addEventListener('click', closeSettingsModal);
 settingsForm.addEventListener('submit', saveSettings);
 testConnectionBtn.addEventListener('click', testBackendConnection);
-themeToggleBtn.addEventListener('click', toggleTheme);
 
 
 // Close modal if clicking on the overlay
@@ -364,7 +336,6 @@ settingsModal.addEventListener('click', (e) => {
 
 // --- Initial Load ---
 function main() {
-  loadTheme();
   loadState();
   render();
   if (!backendSettings) {
