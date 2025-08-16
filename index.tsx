@@ -26,6 +26,7 @@ interface BackendSettings {
 // --- State ---
 let articles: Article[] = [];
 let backendSettings: BackendSettings | null = null;
+let currentTheme: 'light' | 'dark' = 'light';
 
 // --- DOM Elements ---
 const addUrlForm = document.getElementById('add-url-form') as HTMLFormElement;
@@ -34,6 +35,9 @@ const addUrlBtn = document.getElementById('add-url-btn') as HTMLButtonElement;
 
 const articlesGrid = document.getElementById('articles-grid') as HTMLDivElement;
 
+// Theme Toggle
+const themeToggleBtn = document.getElementById('theme-toggle-btn') as HTMLButtonElement;
+
 // Settings Modal Elements
 const settingsModal = document.getElementById('settings-modal') as HTMLDivElement;
 const openSettingsBtn = document.getElementById('open-settings-btn') as HTMLButtonElement;
@@ -41,9 +45,21 @@ const closeSettingsBtn = document.getElementById('close-settings-btn') as HTMLBu
 const settingsForm = document.getElementById('settings-form') as HTMLFormElement;
 const backendUrlInput = document.getElementById('backend-url') as HTMLInputElement;
 const backendKeyInput = document.getElementById('backend-key') as HTMLInputElement;
+const testConnectionBtn = document.getElementById('test-connection-btn') as HTMLButtonElement;
+const connectionStatusEl = document.getElementById('connection-status') as HTMLParagraphElement;
 
 
 // --- Functions ---
+
+function setTheme(theme: 'light' | 'dark') {
+    currentTheme = theme;
+    document.body.classList.toggle('dark-mode', theme === 'dark');
+    localStorage.setItem('newsreader-theme', theme);
+}
+
+function toggleTheme() {
+    setTheme(currentTheme === 'light' ? 'dark' : 'light');
+}
 
 function render() {
   renderArticles();
@@ -119,6 +135,18 @@ async function handleSummarize(articleId: string) {
     }
 }
 
+function alertUserAboutFetchError() {
+    alert(
+`A "Failed to fetch" error occurred. This usually means the browser could not reach the backend server. Please check the following:
+
+1.  Is the Backend URL correct? (e.g., http://123.45.67.89:5000)
+2.  Is your backend server running on the VPS?
+3.  Is the server's firewall configured to allow connections on the specified port (e.g., 5000)?
+4.  Are there any CORS errors in the browser's developer console? (The backend is configured to handle this, but it's worth checking).
+5.  If using HTTPS, is the certificate valid? Check for mixed content warnings.`
+    );
+}
+
 async function fetchArticlesFromSource(url: string) {
     if (!backendSettings?.url || !backendSettings?.key) {
         alert("Backend settings are not configured. Please configure them first.");
@@ -157,7 +185,11 @@ async function fetchArticlesFromSource(url: string) {
 
     } catch (error) {
         console.error("Error fetching articles from source:", error);
-        alert(`Could not fetch articles: ${error.message}`);
+        if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+             alertUserAboutFetchError();
+        } else {
+             alert(`Could not fetch articles: ${error.message}`);
+        }
     } finally {
         addUrlBtn.disabled = false;
         addUrlBtn.textContent = 'Fetch Articles';
@@ -208,12 +240,65 @@ function loadState() {
   }
 }
 
+function loadTheme() {
+    const savedTheme = localStorage.getItem('newsreader-theme') as 'light' | 'dark' | null;
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme) {
+      setTheme(savedTheme);
+    } else if (prefersDark) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+  }
+
 // --- Settings Modal Logic ---
+async function testBackendConnection() {
+    const url = backendUrlInput.value.trim();
+    const key = backendKeyInput.value.trim();
+
+    if (!url || !key) {
+        alert("Please enter both Backend URL and Secret Key to test.");
+        return;
+    }
+
+    connectionStatusEl.textContent = 'Testing...';
+    connectionStatusEl.className = '';
+    testConnectionBtn.disabled = true;
+
+    try {
+        const healthUrl = new URL(url);
+        healthUrl.pathname = '/health';
+
+        const response = await fetch(healthUrl.toString(), {
+            headers: { 'Authorization': `Bearer ${key}` }
+        });
+
+        if (response.ok) {
+            connectionStatusEl.textContent = 'Connection successful!';
+            connectionStatusEl.className = 'success';
+        } else {
+            connectionStatusEl.textContent = `Connection failed (Status: ${response.status}). Check URL and Key.`;
+            connectionStatusEl.className = 'error';
+        }
+    } catch (error) {
+        console.error("Connection test failed:", error);
+        connectionStatusEl.textContent = 'Connection failed. See alert for troubleshooting.';
+        connectionStatusEl.className = 'error';
+        alertUserAboutFetchError();
+    } finally {
+        testConnectionBtn.disabled = false;
+    }
+}
+
 function openSettingsModal() {
     settingsModal.style.display = 'flex';
 }
 function closeSettingsModal() {
     settingsModal.style.display = 'none';
+    connectionStatusEl.textContent = '';
+    connectionStatusEl.className = '';
 }
 function saveSettings(e: Event) {
     e.preventDefault();
@@ -265,6 +350,10 @@ articlesGrid.addEventListener('click', (e) => {
 openSettingsBtn.addEventListener('click', openSettingsModal);
 closeSettingsBtn.addEventListener('click', closeSettingsModal);
 settingsForm.addEventListener('submit', saveSettings);
+testConnectionBtn.addEventListener('click', testBackendConnection);
+themeToggleBtn.addEventListener('click', toggleTheme);
+
+
 // Close modal if clicking on the overlay
 settingsModal.addEventListener('click', (e) => {
     if (e.target === settingsModal) {
@@ -275,6 +364,7 @@ settingsModal.addEventListener('click', (e) => {
 
 // --- Initial Load ---
 function main() {
+  loadTheme();
   loadState();
   render();
   if (!backendSettings) {

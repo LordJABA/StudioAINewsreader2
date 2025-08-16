@@ -11,6 +11,7 @@
   --shadow-color: rgba(0, 0, 0, 0.05);
   --danger-color: #dc3545;
   --danger-hover-color: #c82333;
+  --success-color: #28a745;
 
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -22,6 +23,7 @@ body {
   background-color: var(--background-color);
   color: var(--text-color);
   line-height: 1.6;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
 main {
@@ -119,17 +121,35 @@ button:hover:not(:disabled) {
   background-color: var(--primary-hover-color);
 }
 
-.settings-btn {
+.header-actions {
     position: absolute;
-    top: -10px;
+    top: 0;
     right: 0;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.icon-btn {
     background-color: transparent;
     color: var(--secondary-color);
     padding: 0.5rem;
+    border: none;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
-.settings-btn:hover {
-    background-color: var(--background-color);
+.icon-btn:hover {
+    background-color: var(--border-color);
     color: var(--primary-color);
+}
+.icon-btn svg {
+    width: 24px;
+    height: 24px;
 }
 
 
@@ -144,7 +164,7 @@ button:hover:not(:disabled) {
   border-radius: 8px;
   padding: 1.5rem;
   box-shadow: 0 4px 6px var(--shadow-color);
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s, border-color 0.2s;
   display: flex;
   flex-direction: column;
 }
@@ -313,5 +333,76 @@ button:hover:not(:disabled) {
 .modal-footer {
     display: flex;
     justify-content: flex-end;
+    gap: 0.5rem;
     margin-top: 2rem;
 }
+
+#test-connection-btn {
+    background-color: var(--secondary-color);
+}
+#test-connection-btn:hover:not(:disabled) {
+    background-color: var(--secondary-hover-color);
+}
+
+#connection-status {
+    min-height: 1.2em;
+    margin-top: 1rem;
+    margin-bottom: -1rem; /* pull footer up */
+    text-align: center;
+    font-weight: 500;
+}
+
+#connection-status.success {
+    color: var(--success-color);
+}
+
+#connection-status.error {
+    color: var(--danger-color);
+}
+
+/* --- Dark Mode --- */
+
+#theme-toggle-btn .moon-icon { display: none; }
+#theme-toggle-btn .sun-icon { display: block; }
+body.dark-mode #theme-toggle-btn .moon-icon { display: block; }
+body.dark-mode #theme-toggle-btn .sun-icon { display: none; }
+
+
+body.dark-mode {
+  --background-color: #1a1a1a;
+  --text-color: #e2e8f0;
+  --primary-color: #3b82f6;
+  --primary-hover-color: #2563eb;
+  --secondary-color: #94a3b8;
+  --secondary-hover-color: #b9c7d9;
+  --card-background: #292929;
+  --border-color: #404040;
+  --shadow-color: rgba(0, 0, 0, 0.2);
+  --danger-color: #f87171;
+  --danger-hover-color: #ef4444;
+  --success-color: #4ade80;
+}
+
+body.dark-mode input[type="url"],
+body.dark-mode input[type="text"],
+body.dark-mode input[type="password"] {
+    background-color: #333;
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+body.dark-mode input[type="url"]:focus,
+body.dark-mode input[type="text"]:focus,
+body.dark-mode input[type="password"]:focus {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35);
+}
+
+body.dark-mode .article-card:hover {
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.25);
+}
+body.dark-mode .article-summary {
+    background-color: var(--background-color);
+}
+body.dark-mode .modal-overlay {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
