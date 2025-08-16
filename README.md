@@ -6,13 +6,12 @@ This document outlines the vision and features for an AI-powered newsreader appl
 ## Core Architecture
 
 -   **Frontend:** A pure HTML/CSS/TypeScript single-page application that runs entirely in the browser. It handles the user interface, state management, and communication with the Gemini API for AI tasks.
--   **Backend:** A lightweight Python Flask server responsible for fetching article content from user-provided URLs. This is necessary to bypass browser CORS security restrictions. It is secured by a secret key.
+-   **Backend:** A lightweight Python Flask server responsible for fetching and parsing multiple articles from a user-provided news source URL. This is necessary to bypass browser CORS security restrictions. It is secured by a secret key.
 
 ## Core Features
 
--   **Add by URL:** Allows users to add articles by providing a URL. A backend service fetches and parses the article content.
--   **Add by Text:** Allows users to paste article title and text directly into the application.
--   **AI Summarization:** Integrates with the Google Gemini API to generate concise summaries of the article content.
+-   **Add by Source URL:** Allows users to add a news source by providing its main URL (e.g., `https://www.theverge.com`). The backend service then crawls the source, finds recent articles, and fetches their content.
+-   **AI Summarization:** Integrates with the Google Gemini API to generate concise summaries of article content on-demand.
 -   **Local Persistence:** All articles and settings are saved in the browser's local storage for a persistent experience.
 
 ## Future Feature Ideas

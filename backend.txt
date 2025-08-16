@@ -1,7 +1,8 @@
+
 #server.py contents
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from newspaper import Article
+import newspaper
 from dotenv import load_dotenv
 import os
 from functools import wraps
@@ -47,41 +48,49 @@ def require_secret_key(f):
     return decorated_function
 
 # --- Routes ---
-@app.route('/fetch-url', methods=['GET'])
+@app.route('/fetch-source', methods=['GET'])
 @require_secret_key # Apply the security decorator
-def fetch_url_endpoint():
+def fetch_source_endpoint():
     """
-    Fetches and parses an article from a given URL.
+    Crawls a news source URL, parses its recent articles, and returns them as a list.
     The URL is passed as a query parameter.
-    e.g., /fetch-url?url=https://example.com/article
+    e.g., /fetch-source?url=https://example.com/news
     """
-    url_to_fetch = request.args.get('url')
-    if not url_to_fetch:
+    source_url = request.args.get('url')
+    if not source_url:
         return jsonify({"error": "URL parameter is missing."}), 400 # Bad Request
 
     try:
-        # Initialize newspaper Article object
-        article = Article(url_to_fetch)
-
-        # Download and parse the article
-        article.download()
-        article.parse()
-
-        # Check if parsing was successful
-        if not article.title or not article.text:
-             return jsonify({
-                "error": "Could not parse the article. The website might be blocking scrapers or has an unsupported format."
+        print(f"Building source for: {source_url}")
+        source = newspaper.build(source_url, memoize_articles=False)
+        
+        articles_data = []
+        # Limit to the first 10 articles to avoid long processing times and excessive traffic
+        for article in source.articles[:10]:
+            try:
+                article.download()
+                article.parse()
+                if article.title and article.text:
+                    articles_data.append({
+                        "title": article.title,
+                        "content": article.text,
+                        "source": article.url
+                    })
+            except Exception as e:
+                # Log and skip this individual article if it fails
+                print(f"Could not process article {article.url}: {e}")
+        
+        if not articles_data:
+            return jsonify({
+                "error": "Could not find or parse any articles from the provided source URL."
             }), 422 # Unprocessable Entity
 
-        # Return the extracted title and content as JSON
-        return jsonify({
-            "title": article.title,
-            "content": article.text
-        })
+        return jsonify(articles_data)
+
     except Exception as e:
-        # Catch any other exceptions during download/parsing
-        print(f"Error fetching/parsing article at URL {url_to_fetch}: {e}")
-        return jsonify({"error": f"An error occurred while processing the URL: {str(e)}"}), 500
+        # Catch any other exceptions during the build process
+        print(f"Error building source at URL {source_url}: {e}")
+        return jsonify({"error": f"An error occurred while processing the source URL: {str(e)}"}), 500
 
 
 if __name__ == '__main__':

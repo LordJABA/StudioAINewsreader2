@@ -13,7 +13,7 @@ interface Article {
   id: string;
   title: string;
   content: string;
-  source: string; // URL for fetched, "Pasted Text" for manual
+  source: string; // URL for fetched article
   summary?: string;
   isSummarizing?: boolean;
 }
@@ -32,16 +32,7 @@ const addUrlForm = document.getElementById('add-url-form') as HTMLFormElement;
 const sourceUrlInput = document.getElementById('source-url') as HTMLInputElement;
 const addUrlBtn = document.getElementById('add-url-btn') as HTMLButtonElement;
 
-const addTextForm = document.getElementById('add-text-form') as HTMLFormElement;
-const articleTitleInput = document.getElementById('article-title') as HTMLInputElement;
-const articleTextInput = document.getElementById('article-text') as HTMLTextAreaElement;
-
 const articlesGrid = document.getElementById('articles-grid') as HTMLDivElement;
-
-const tabUrl = document.getElementById('tab-url') as HTMLButtonElement;
-const tabText = document.getElementById('tab-text') as HTMLButtonElement;
-const panelUrl = document.getElementById('panel-url') as HTMLDivElement;
-const panelText = document.getElementById('panel-text') as HTMLDivElement;
 
 // Settings Modal Elements
 const settingsModal = document.getElementById('settings-modal') as HTMLDivElement;
@@ -61,7 +52,7 @@ function render() {
 function renderArticles() {
   articlesGrid.innerHTML = '';
   if (articles.length === 0) {
-    articlesGrid.innerHTML = '<p>No articles to display. Add content using the forms above to get started.</p>';
+    articlesGrid.innerHTML = '<p>No articles to display. Add a news source using the form above to get started.</p>';
     return;
   }
   articles.forEach(article => {
@@ -94,7 +85,7 @@ function renderArticles() {
         ${actionsHTML}
       </div>
       <div class="article-card-footer">
-        <span>Source: ${article.source}</span>
+        <span><a href="${article.source}" target="_blank" rel="noopener noreferrer">Source</a></span>
         <button class="remove-article-btn" data-id="${article.id}" aria-label="Remove article">Remove</button>
       </div>
     `;
@@ -110,7 +101,7 @@ async function handleSummarize(articleId: string) {
     renderArticles();
 
     try {
-        const prompt = `Summarize the following article in a concise paragraph:\n\n---\n\nTitle: ${article.title}\n\n${article.content}`;
+        const prompt = `Summarize the following web article in a concise paragraph:\n\n---\n\nTitle: ${article.title}\n\n${article.content}`;
         const response: GenerateContentResponse = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
@@ -128,7 +119,7 @@ async function handleSummarize(articleId: string) {
     }
 }
 
-async function fetchArticleFromBackend(url: string) {
+async function fetchArticlesFromSource(url: string) {
     if (!backendSettings?.url || !backendSettings?.key) {
         alert("Backend settings are not configured. Please configure them first.");
         openSettingsModal();
@@ -140,7 +131,7 @@ async function fetchArticleFromBackend(url: string) {
     
     try {
         const fetchUrl = new URL(backendSettings.url);
-        fetchUrl.pathname = '/fetch-url';
+        fetchUrl.pathname = '/fetch-source';
         fetchUrl.searchParams.set('url', url);
 
         const response = await fetch(fetchUrl.toString(), {
@@ -154,29 +145,38 @@ async function fetchArticleFromBackend(url: string) {
             throw new Error(errorData.error || `Failed to fetch with status: ${response.status}`);
         }
 
-        const data = await response.json();
+        const data: Omit<Article, 'id'>[] = await response.json();
+
+        const newArticles: Article[] = data.map((art, index) => ({
+            ...art,
+            id: `art-${Date.now()}-${index}`,
+        }));
         
-        const newArticle: Article = {
-            id: `url-${Date.now()}`,
-            title: data.title,
-            content: data.content,
-            source: url,
-        };
-        addArticle(newArticle);
+        addArticles(newArticles);
         sourceUrlInput.value = '';
 
     } catch (error) {
-        console.error("Error fetching article from backend:", error);
-        alert(`Could not fetch the article: ${error.message}`);
+        console.error("Error fetching articles from source:", error);
+        alert(`Could not fetch articles: ${error.message}`);
     } finally {
         addUrlBtn.disabled = false;
-        addUrlBtn.innerHTML = 'Fetch Article';
+        addUrlBtn.textContent = 'Fetch Articles';
     }
 }
 
 
-function addArticle(article: Article) {
-    articles.unshift(article);
+function addArticles(newArticles: Article[]) {
+    // Filter out articles that are already in the list based on their source URL
+    const uniqueNewArticles = newArticles.filter(newArt => 
+        !articles.some(existingArt => existingArt.source === newArt.source)
+    );
+    
+    if (uniqueNewArticles.length === 0) {
+        alert("No new articles found from this source.");
+        return;
+    }
+
+    articles.unshift(...uniqueNewArticles);
     saveState();
     render();
 }
@@ -228,21 +228,6 @@ function saveSettings(e: Event) {
 
 // --- Event Listeners ---
 
-// Tab switching
-tabUrl.addEventListener('click', () => {
-    tabUrl.classList.add('active');
-    tabText.classList.remove('active');
-    panelUrl.style.display = 'block';
-    panelText.style.display = 'none';
-});
-
-tabText.addEventListener('click', () => {
-    tabText.classList.add('active');
-    tabUrl.classList.remove('active');
-    panelText.style.display = 'block';
-    panelUrl.style.display = 'none';
-});
-
 // Form Submissions
 addUrlForm.addEventListener('submit', (e) => {
   e.preventDefault();
@@ -250,30 +235,11 @@ addUrlForm.addEventListener('submit', (e) => {
   if (url) {
     try {
       new URL(url);
-      fetchArticleFromBackend(url);
+      fetchArticlesFromSource(url);
     } catch (_) {
       alert("Please enter a valid URL.");
     }
   }
-});
-
-addTextForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const title = articleTitleInput.value.trim();
-    const content = articleTextInput.value.trim();
-    if (title && content) {
-        const newArticle: Article = {
-            id: `text-${Date.now()}`,
-            title,
-            content,
-            source: "Pasted Text"
-        };
-        addArticle(newArticle);
-        articleTitleInput.value = '';
-        articleTextInput.value = '';
-    } else {
-        alert("Please provide both a title and content for the article.")
-    }
 });
 
 // Delegated event listener for dynamic article content

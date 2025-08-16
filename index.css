@@ -68,48 +68,16 @@ section {
   margin-bottom: 3rem;
 }
 
-/* Tab Styles */
-.tabs {
-  display: flex;
-  border-bottom: 1px solid var(--border-color);
-  margin-bottom: 1.5rem;
-}
-
-.tab-btn {
-  padding: 0.75rem 1.5rem;
-  cursor: pointer;
-  border: none;
-  background-color: transparent;
-  border-bottom: 3px solid transparent;
-  font-size: 1rem;
-  color: var(--secondary-color);
-  transition: all 0.2s ease-in-out;
-}
-
-.tab-btn.active {
-  color: var(--primary-color);
-  border-bottom-color: var(--primary-color);
-  font-weight: 500;
-}
-
-.tab-panel {
-    /* JS will toggle display */
-}
-
 /* Form Styles */
-#add-url-form, #add-text-form {
+#add-url-form {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
-#add-url-form {
-  flex-direction: row;
-  align-items: center;
-}
-
-input[type="url"], input[type="text"], input[type="password"], textarea {
+input[type="url"], input[type="text"], input[type="password"] {
   flex-grow: 1;
   padding: 0.75rem;
   border: 1px solid var(--border-color);
@@ -119,12 +87,8 @@ input[type="url"], input[type="text"], input[type="password"], textarea {
   color: var(--text-color);
   font-family: 'Roboto Mono', monospace;
 }
-textarea {
-    font-family: 'Inter', sans-serif;
-    resize: vertical;
-}
 
-input[type="url"]:focus, input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
+input[type="url"]:focus, input[type="text"]:focus, input[type="password"]:focus {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);

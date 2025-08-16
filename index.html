@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Newsreader</title>
+    <title>AI News Reader</title>
     <link rel="stylesheet" href="index.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,8 +41,8 @@
 
     <main>
       <header>
-        <h1>AI Newsreader</h1>
-        <p>Your personal, intelligent news aggregator.</p>
+        <h1>AI News Reader</h1>
+        <p>Add a news source to get the latest articles.</p>
          <button id="open-settings-btn" class="settings-btn" aria-label="Open settings">
            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
            <span>Settings</span>
@@ -50,30 +50,12 @@
       </header>
 
       <section id="source-manager" aria-labelledby="source-manager-heading">
-        <h2 id="source-manager-heading">Add Content</h2>
-        
-        <div class="tabs">
-          <button id="tab-url" class="tab-btn active" aria-controls="panel-url">Add by URL</button>
-          <button id="tab-text" class="tab-btn" aria-controls="panel-text">Add by Pasting Text</button>
-        </div>
-
-        <div id="panel-url" class="tab-panel active">
-            <form id="add-url-form">
-                <label for="source-url" class="sr-only">Article URL</label>
-                <input type="url" id="source-url" placeholder="https://example.com/article" required />
-                <button type="submit" id="add-url-btn">Fetch Article</button>
-            </form>
-        </div>
-
-        <div id="panel-text" class="tab-panel" style="display: none;">
-            <form id="add-text-form">
-                <label for="article-title" class="sr-only">Article Title</label>
-                <input type="text" id="article-title" placeholder="Enter article title" required />
-                <label for="article-text" class="sr-only">Article Text</label>
-                <textarea id="article-text" placeholder="Paste the full text of the article here..." rows="10" required></textarea>
-                <button type="submit">Add Article</button>
-            </form>
-        </div>
+        <h2 id="source-manager-heading">Add News Source</h2>
+        <form id="add-url-form">
+            <label for="source-url" class="sr-only">News Source URL</label>
+            <input type="url" id="source-url" placeholder="https://www.theverge.com" required />
+            <button type="submit" id="add-url-btn">Fetch Articles</button>
+        </form>
       </section>
 
       <section id="articles-container" aria-labelledby="articles-heading">
